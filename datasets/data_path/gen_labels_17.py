@@ -37,6 +37,7 @@ for seq in seqs:
             tid_last = tid
         x += w/2
         y += h/2
+    
         label_fpath = osp.join(seq_label_root, '{:06d}.txt'.format(fid)) 
         label_str ='0 {:d} {:.6f} {:.6f} {:.6f} {:.6f}\n'.format(
                 tid_curr, x/seq_width, y/seq_height, w/seq_width, h/seq_height)
