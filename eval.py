@@ -266,15 +266,23 @@ class Detector(object):
 
         self.args = args
         self.detr = model
-
         self.seq_num = seq_num
-        img_list = os.listdir(os.path.join(self.args.mot_path, 'MOT15/images/train', self.seq_num, 'img1'))
-        img_list = [os.path.join(self.args.mot_path, 'MOT15/images/train', self.seq_num, 'img1', _) for _ in img_list if
-                    ('jpg' in _) or ('png' in _)]
+
+        #questo testa su tutto il train set di mot17
+       # img_list = os.listdir(os.path.join(self.args.mot_path, 'MOT17/images/train' ,self.seq_num, 'img1'))
+       # img_list = [os.path.join(self.args.mot_path, 'MOT17/images/train' , self.seq_num, 'img1', _) for _ in img_list if
+       #            ('jpg' in _) or ('png' in _)]
+
+        #Carico solo le immagini di val_half di quella sequenza di mot17 passate come argomento  
+        with open(self.args.data_txt_path_val, 'r') as f:
+                img_list = [os.path.join(self.args.mot_path, line.strip()) for line in f if line.strip().endswith(('.jpg', '.png'))  and self.seq_num in line]
+
 
         self.img_list = sorted(img_list)
         self.img_len = len(self.img_list)
         self.tr_tracker = MOTR()
+
+        #print(img_list)
 
         '''
         common settings
@@ -337,7 +345,7 @@ class Detector(object):
                 f.write(line)
 
     def eval_seq(self):
-        data_root = os.path.join(self.args.mot_path, 'MOT15/images/train')
+        data_root = os.path.join(self.args.mot_path, 'MOT17/images/train')
         result_filename = os.path.join(self.predict_path, 'gt.txt')
         evaluator = Evaluator(data_root, self.seq_num)
         accs = evaluator.eval_file(result_filename)
@@ -384,13 +392,13 @@ class Detector(object):
 
             if vis:
                 # for visual
-                cur_vis_img_path = os.path.join(self.save_path, 'frame_{}.jpg'.format(i))
+                cur_vis_img_path = os.path.join(self.save_path, 'frame_{}.jpg'.format(i+1+self.img_len +2))  #cambio da i
                 gt_boxes = None
                 self.visualize_img_with_bbox(cur_vis_img_path, ori_img, dt_instances, ref_pts=all_ref_pts, gt_boxes=gt_boxes)
 
             tracker_outputs = self.tr_tracker.update(dt_instances)
             self.write_results(txt_path=os.path.join(self.predict_path, 'gt.txt'),
-                               frame_id=(i + 1),
+                               frame_id=(i + 1 + self.img_len + 2),   #cambio da i + 1 cosi prima immagine è dalla meta piu due
                                bbox_xyxy=tracker_outputs[:, :4],
                                identities=tracker_outputs[:, 5])
         print("totally {} dts max_id={}".format(total_dts, max_id))
@@ -410,8 +418,30 @@ if __name__ == '__main__':
     detr = detr.cuda()
     detr.eval()
 
-    seq_nums = ['ADL-Rundle-6', 'ETH-Bahnhof', 'KITTI-13', 'PETS09-S2L1', 'TUD-Stadtmitte', 'ADL-Rundle-8', 'KITTI-17',
-                'ETH-Pedcross2', 'ETH-Sunnyday', 'TUD-Campus', 'Venice-2']
+    #seq_nums = ['ADL-Rundle-6', 'ETH-Bahnhof', 'KITTI-13', 'PETS09-S2L1', 'TUD-Stadtmitte', 'ADL-Rundle-8', 'KITTI-17',
+    #            'ETH-Pedcross2', 'ETH-Sunnyday', 'TUD-Campus', 'Venice-2']
+
+    seq_nums = ['MOT17-02-DPM',
+                'MOT17-02-FRCNN',
+                'MOT17-02-SDP',
+                'MOT17-04-DPM',
+                'MOT17-04-FRCNN',
+                'MOT17-04-SDP',
+                'MOT17-05-DPM',
+                'MOT17-05-FRCNN',
+                'MOT17-05-SDP',
+                'MOT17-09-DPM',
+                'MOT17-09-FRCNN',
+                'MOT17-09-SDP',
+                'MOT17-10-DPM',
+                'MOT17-10-FRCNN',
+                'MOT17-10-SDP',
+                'MOT17-11-DPM',
+                'MOT17-11-FRCNN',
+                'MOT17-11-SDP',
+                'MOT17-13-DPM',
+                'MOT17-13-FRCNN',
+                'MOT17-13-SDP']
     accs = []
     seqs = []
 
@@ -431,5 +461,7 @@ if __name__ == '__main__':
         namemap=mm.io.motchallenge_metric_names
     )
     print(strsummary)
-    with open("eval_log.txt", 'a') as f:
+
+    results_path= os.path.join(args.output_dir, 'results', "eval_log.txt")
+    with open(results_path, 'a') as f:
         print(strsummary, file=f)

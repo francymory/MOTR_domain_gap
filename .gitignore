@@ -7,3 +7,4 @@ build/
 *.egg-info
 *.mp4
 datasets/mot/MOT17/labels_with_ids/train
+pretrained/r50_deformable_detr_plus_iterative_bbox_refinement-checkpoint.pth

@@ -1,5 +1,5 @@
 #!/bin/bash  
-#SBATCH --job-name=MOTR_train
+#SBATCH --job-name=MOTR_train_motsynth
 #SBATCH --output="/leonardo/home/userexternal/fmorandi/MOTR_domain_gap/exps/slurm_logs/%x_%A_%a.out"
 #SBATCH --error="/leonardo/home/userexternal/fmorandi/MOTR_domain_gap/exps/slurm_logs/%x_%A_%a.err"
 #SBATCH --nodes=2
@@ -9,7 +9,7 @@
 #SBATCH --cpus-per-gpu=8
 #SBATCH --partition=boost_usr_prod
 #SBATCH --account=IscrB_FeeCO
-#SBATCH --time=2-00:00:00
+#SBATCH --time=10:00:00
 #SBATCH --qos=boost_qos_lprod
 ##SBATCH --qos=boost_qos_dbg
 
@@ -53,19 +53,19 @@ echo "MASTER_PORT: $MASTER_PORT"
 
 # Variabili per il modello pre-addestrato e la directory di output
 pretrain="/leonardo/home/userexternal/fmorandi/MOTR_domain_gap/pretrained/r50_deformable_detr_plus_iterative_bbox_refinement-checkpoint.pth"
-output_dir="/leonardo/home/userexternal/fmorandi/MOTR_domain_gap/exps/e2e_motr_r50_mot17trainhalf"
+output_dir="/leonardo/home/userexternal/fmorandi/MOTR_domain_gap/exps/e2e_motr_r50_motsynth_train10"
 
 # Lancia il training usando torchrun per il training distribuito
 srun --exclusive -c $SLURM_CPUS_PER_GPU torchrun --nnodes=$SLURM_NNODES --nproc_per_node=$SLURM_GPUS_PER_NODE --rdzv-endpoint=$MASTER_ADDR --rdzv-id=$SLURM_JOB_NAME --rdzv-backend=c10d main.py \
     --meta_arch motr \
-    --dataset_file e2e_joint \
+    --dataset_file e2e_motsynth \
     --epoch 50 \
     --with_box_refine \
     --lr_drop 40 \
     --lr 2e-4 \
     --lr_backbone 2e-5 \
-    --pretrained ./pretrained/r50_deformable_detr_plus_iterative_bbox_refinement-checkpoint.pth\
-    --output_dir exps/e2e_motr_r50_mot17trainhalf \
+    --pretrained $pretrain\
+    --output_dir $output_dir\
     --batch_size 1 \
     --sample_mode 'random_interval' \
     --sample_interval 10 \
@@ -79,5 +79,5 @@ srun --exclusive -c $SLURM_CPUS_PER_GPU torchrun --nnodes=$SLURM_NNODES --nproc_
     --query_interaction_layer 'QIM' \
     --extra_track_attn \
     --mot_path ./datasets/mot \
-    --data_txt_path_train ./datasets/data_path/mot17_half_train.train \
-    --data_txt_path_val ./datasets/data_path/mot17_half_val.train \
+    --data_txt_path_train ./datasets/data_path/motsynth_10_train_correct.train\
+    --data_txt_path_val ./datasets/data_path/motsynth_10_val.train

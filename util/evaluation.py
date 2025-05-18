@@ -123,7 +123,7 @@ class Evaluator(object):
     def load_annotations(self):
         assert self.data_type == 'mot'
 
-        gt_filename = os.path.join(self.data_root, self.seq_name, 'gt', 'gt.txt')
+        gt_filename = os.path.join(self.data_root, self.seq_name, 'gt', 'gt_half_val.txt')  #modifico per valuatare su val_half era gt.txt
         self.gt_frame_dict = read_results(gt_filename, self.data_type, is_gt=True)
         self.gt_ignore_frame_dict = read_results(gt_filename, self.data_type, is_ignore=True)
 

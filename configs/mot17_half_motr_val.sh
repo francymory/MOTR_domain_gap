@@ -1,15 +1,15 @@
 #!/bin/bash  
-#SBATCH --job-name=MOTR_train
-#SBATCH --output="/leonardo/home/userexternal/fmorandi/MOTR_domain_gap/exps/slurm_logs/%x_%A_%a.out"
-#SBATCH --error="/leonardo/home/userexternal/fmorandi/MOTR_domain_gap/exps/slurm_logs/%x_%A_%a.err"
-#SBATCH --nodes=2
+#SBATCH --job-name=MOTR_val_mot17
+#SBATCH --output="/leonardo/home/userexternal/fmorandi/MOTR_domain_gap/exps/slurm_logs/%x_%A.out"
+#SBATCH --error="/leonardo/home/userexternal/fmorandi/MOTR_domain_gap/exps/slurm_logs/%x_%A.err"
+#SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
 #SBATCH --gpus-per-node=1
 #SBATCH --mem=160GB
 #SBATCH --cpus-per-gpu=8
 #SBATCH --partition=boost_usr_prod
 #SBATCH --account=IscrB_FeeCO
-#SBATCH --time=06:00:00
+#SBATCH --time=00:30:00
 #SBATCH --qos=boost_qos_lprod
 ##SBATCH --qos=boost_qos_dbg
 
@@ -52,16 +52,16 @@ echo "MASTER_ADDR: $MASTER_ADDR"
 echo "MASTER_PORT: $MASTER_PORT"
 
 # Variabili per il modello pre-addestrato e la directory di output
-pretrain="/leonardo/home/userexternal/fmorandi/MOTR_domain_gap/pretrained/r50_deformable_detr_plus_iterative_bbox_refinement-checkpoint.pth"
-output_dir="/leonardo/home/userexternal/fmorandi/MOTR_domain_gap/exps/e2e_motr_r50_mot17trainhalf"
+pretrain="/leonardo/home/userexternal/fmorandi/MOTR_domain_gap/exps/e2e_motr_r50_mot17trainhalf/checkpoint0049.pth"
+output_dir="/leonardo/home/userexternal/fmorandi/MOTR_domain_gap/exps/e2e_motr_r50_mot17train_val_half"
 
 # Lancia il training usando torchrun per il training distribuito
-srun --exclusive -c $SLURM_CPUS_PER_GPU torchrun --nnodes=$SLURM_NNODES --nproc_per_node=$SLURM_GPUS_PER_NODE --rdzv-endpoint=$MASTER_ADDR --rdzv-id=$SLURM_JOB_NAME --rdzv-backend=c10d main.py \
+srun --exclusive -c $SLURM_CPUS_PER_GPU torchrun --nnodes=$SLURM_NNODES --nproc_per_node=$SLURM_GPUS_PER_NODE --rdzv-endpoint=$MASTER_ADDR --rdzv-id=$SLURM_JOB_NAME --rdzv-backend=c10d eval.py \
     --meta_arch motr \
     --dataset_file e2e_joint \
-    --epoch 50 \
+    --epoch 200 \
     --with_box_refine \
-    --lr_drop 40 \
+    --lr_drop 100 \
     --lr 2e-4 \
     --lr_backbone 2e-5 \
     --pretrained $pretrain \
@@ -69,7 +69,7 @@ srun --exclusive -c $SLURM_CPUS_PER_GPU torchrun --nnodes=$SLURM_NNODES --nproc_
     --batch_size 1 \
     --sample_mode 'random_interval' \
     --sample_interval 10 \
-    --sampler_steps 10 20 30 \
+    --sampler_steps 50 90 120 \
     --sampler_lengths 2 3 4 5 \
     --update_query_pos \
     --merger_dropout 0 \
@@ -80,4 +80,5 @@ srun --exclusive -c $SLURM_CPUS_PER_GPU torchrun --nnodes=$SLURM_NNODES --nproc_
     --extra_track_attn \
     --mot_path ./datasets/mot \
     --data_txt_path_train ./datasets/data_path/mot17_half_train.train \
-    --data_txt_path_val ./datasets/data_path/mot17_half_val.train
+    --data_txt_path_val ./datasets/data_path/mot17_half_val.train\
+    --resume  $pretrain
