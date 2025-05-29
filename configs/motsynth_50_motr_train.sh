@@ -1,5 +1,5 @@
 #!/bin/bash  
-#SBATCH --job-name=MOTR_train_motsynth_resume
+#SBATCH --job-name=MOTR_train_motsynth50
 #SBATCH --output="/leonardo/home/userexternal/fmorandi/MOTR_domain_gap/exps/slurm_logs/%x_%A_%a.out"
 #SBATCH --error="/leonardo/home/userexternal/fmorandi/MOTR_domain_gap/exps/slurm_logs/%x_%A_%a.err"
 #SBATCH --nodes=2
@@ -52,12 +52,8 @@ echo "MASTER_ADDR: $MASTER_ADDR"
 echo "MASTER_PORT: $MASTER_PORT"
 
 # Variabili per il modello pre-addestrato e la directory di output
-#ppretrain="/leonardo/home/userexternal/fmorandi/MOTR_domain_gap/pretrained/r50_deformable_detr_plus_iterative_bbox_refinement-checkpoint.pth"
-#ooutput_dir="/leonardo/home/userexternal/fmorandi/MOTR_domain_gap/exps/e2e_motr_r50_motsynth_train10"
-
-# Variabili per  continuare ad addestrare il modello pre-addestrato per altre 20 epoche
-pretrain="/leonardo/home/userexternal/fmorandi/MOTR_domain_gap/exps/e2e_motr_r50_motsynth_train10/checkpoint.pth"
-output_dir="/leonardo/home/userexternal/fmorandi/MOTR_domain_gap/exps/e2e_motr_r50_motsynth_train10_resume"
+pretrain="/leonardo/home/userexternal/fmorandi/MOTR_domain_gap/pretrained/r50_deformable_detr_plus_iterative_bbox_refinement-checkpoint.pth"
+output_dir="/leonardo/home/userexternal/fmorandi/MOTR_domain_gap/exps/e2e_motr_r50_motsynth_train50"
 
 # Lancia il training usando torchrun per il training distribuito
 srun --exclusive -c $SLURM_CPUS_PER_GPU torchrun --nnodes=$SLURM_NNODES --nproc_per_node=$SLURM_GPUS_PER_NODE --rdzv-endpoint=$MASTER_ADDR --rdzv-id=$SLURM_JOB_NAME --rdzv-backend=c10d main.py \
@@ -83,5 +79,5 @@ srun --exclusive -c $SLURM_CPUS_PER_GPU torchrun --nnodes=$SLURM_NNODES --nproc_
     --query_interaction_layer 'QIM' \
     --extra_track_attn \
     --mot_path ./datasets/mot \
-    --data_txt_path_train ./datasets/data_path/motsynth_10_train_correct.train\
-    --data_txt_path_val ./datasets/data_path/motsynth_10_val.train
+    --data_txt_path_train ./datasets/data_path/motsynth_50_train_correct.train\
+    --data_txt_path_val ./datasets/data_path/motsynth_50_val.train

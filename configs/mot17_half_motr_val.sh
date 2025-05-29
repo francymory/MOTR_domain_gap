@@ -1,5 +1,5 @@
 #!/bin/bash  
-#SBATCH --job-name=MOTR_val_mot17
+#SBATCH --job-name=MOTR_val_motsynth_50ep
 #SBATCH --output="/leonardo/home/userexternal/fmorandi/MOTR_domain_gap/exps/slurm_logs/%x_%A.out"
 #SBATCH --error="/leonardo/home/userexternal/fmorandi/MOTR_domain_gap/exps/slurm_logs/%x_%A.err"
 #SBATCH --nodes=1
@@ -51,9 +51,13 @@ export MASTER_PORT=$(comm -23 <(seq 5000 6000 | sort) <(ss -Htan | awk '{print $
 echo "MASTER_ADDR: $MASTER_ADDR"
 echo "MASTER_PORT: $MASTER_PORT"
 
-# Variabili per il modello pre-addestrato e la directory di output
-pretrain="/leonardo/home/userexternal/fmorandi/MOTR_domain_gap/exps/e2e_motr_r50_mot17trainhalf/checkpoint0049.pth"
-output_dir="/leonardo/home/userexternal/fmorandi/MOTR_domain_gap/exps/e2e_motr_r50_mot17train_val_half"
+# Variabili per il modello pre-addestrato su mot17 half train e la directory di output
+##pretrain="/leonardo/home/userexternal/fmorandi/MOTR_domain_gap/exps/e2e_motr_r50_mot17trainhalf/checkpoint.pth"
+##output_dir="/leonardo/home/userexternal/fmorandi/MOTR_domain_gap/exps/e2e_motr_r50_mot17train_val_half_checkpoint"
+
+#variabili per valutazione del modello addestrato su motsynth
+pretrain="/leonardo/home/userexternal/fmorandi/MOTR_domain_gap/exps/e2e_motr_r50_motsynth_train10_50epochs/checkpoint.pth"
+output_dir="/leonardo/home/userexternal/fmorandi/MOTR_domain_gap/exps/e2e_motr_motsynthtrain10_mot17valhalf_50epochs"
 
 # Lancia il training usando torchrun per il training distribuito
 srun --exclusive -c $SLURM_CPUS_PER_GPU torchrun --nnodes=$SLURM_NNODES --nproc_per_node=$SLURM_GPUS_PER_NODE --rdzv-endpoint=$MASTER_ADDR --rdzv-id=$SLURM_JOB_NAME --rdzv-backend=c10d eval.py \

@@ -1,5 +1,5 @@
 #!/bin/bash  
-#SBATCH --job-name=MOTR_train_motsynth_resume
+#SBATCH --job-name=MOTR_train_motsynth_50epochs
 #SBATCH --output="/leonardo/home/userexternal/fmorandi/MOTR_domain_gap/exps/slurm_logs/%x_%A_%a.out"
 #SBATCH --error="/leonardo/home/userexternal/fmorandi/MOTR_domain_gap/exps/slurm_logs/%x_%A_%a.err"
 #SBATCH --nodes=2
@@ -9,7 +9,7 @@
 #SBATCH --cpus-per-gpu=8
 #SBATCH --partition=boost_usr_prod
 #SBATCH --account=IscrB_FeeCO
-#SBATCH --time=2-00:00:00
+#SBATCH --time=4-00:00:00
 #SBATCH --qos=boost_qos_lprod
 ##SBATCH --qos=boost_qos_dbg
 
@@ -52,28 +52,24 @@ echo "MASTER_ADDR: $MASTER_ADDR"
 echo "MASTER_PORT: $MASTER_PORT"
 
 # Variabili per il modello pre-addestrato e la directory di output
-#ppretrain="/leonardo/home/userexternal/fmorandi/MOTR_domain_gap/pretrained/r50_deformable_detr_plus_iterative_bbox_refinement-checkpoint.pth"
-#ooutput_dir="/leonardo/home/userexternal/fmorandi/MOTR_domain_gap/exps/e2e_motr_r50_motsynth_train10"
-
-# Variabili per  continuare ad addestrare il modello pre-addestrato per altre 20 epoche
-pretrain="/leonardo/home/userexternal/fmorandi/MOTR_domain_gap/exps/e2e_motr_r50_motsynth_train10/checkpoint.pth"
-output_dir="/leonardo/home/userexternal/fmorandi/MOTR_domain_gap/exps/e2e_motr_r50_motsynth_train10_resume"
+pretrain="/leonardo/home/userexternal/fmorandi/MOTR_domain_gap/pretrained/r50_deformable_detr_plus_iterative_bbox_refinement-checkpoint.pth"
+output_dir="/leonardo/home/userexternal/fmorandi/MOTR_domain_gap/exps/e2e_motr_r50_motsynth_train10_50epochs"
 
 # Lancia il training usando torchrun per il training distribuito
 srun --exclusive -c $SLURM_CPUS_PER_GPU torchrun --nnodes=$SLURM_NNODES --nproc_per_node=$SLURM_GPUS_PER_NODE --rdzv-endpoint=$MASTER_ADDR --rdzv-id=$SLURM_JOB_NAME --rdzv-backend=c10d main.py \
     --meta_arch motr \
     --dataset_file e2e_motsynth \
-    --epoch 20 \
+    --epoch 50 \
     --with_box_refine \
-    --lr_drop 16 \
+    --lr_drop 40 \
     --lr 2e-4 \
     --lr_backbone 2e-5 \
     --pretrained $pretrain\
     --output_dir $output_dir\
     --batch_size 1 \
     --sample_mode 'random_interval' \
-    --sample_interval 5 \
-    --sampler_steps 5 10 12 \
+    --sample_interval 10 \
+    --sampler_steps 10 20 30 \
     --sampler_lengths 2 3 4 5 \
     --update_query_pos \
     --merger_dropout 0 \

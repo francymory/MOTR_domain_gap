@@ -2,8 +2,8 @@ import os
 
 # === CONFIGURAZIONE ===
 base_path = "/leonardo/home/userexternal/fmorandi/MOTR_domain_gap/datasets/mot"  # radice del dataset
-input_file = "/leonardo/home/userexternal/fmorandi/MOTR_domain_gap/datasets/data_path/motsynth_10_train.train"         # file con i percorsi originali (.jpg)
-output_file = "/leonardo/home/userexternal/fmorandi/MOTR_domain_gap/datasets/data_path/motsynth_10_train_correct.train"  # file di output
+input_file = "/leonardo/home/userexternal/fmorandi/MOTR_domain_gap/datasets/data_path/motsynth_50_train.train"         # file con i percorsi originali (.jpg)
+output_file = "/leonardo/home/userexternal/fmorandi/MOTR_domain_gap/datasets/data_path/motsynth_50_train_correct.train"  # file di output
 
 # === FUNZIONE PRINCIPALE ===
 def filter_valid_image_paths(input_file, output_file, base_path):

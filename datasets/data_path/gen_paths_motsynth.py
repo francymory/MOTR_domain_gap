@@ -10,7 +10,7 @@ def parse_args():
     parser.add_argument('--save-dir', default='/leonardo/home/userexternal/fmorandi/MOTR_domain_gap/datasets/data_path', help="Directory where the new train.txt and half.txt will be saved")
     parser.add_argument('--train-split', default='train', help="Name of the txt file (without .txt) that contains train sequence IDs")
     parser.add_argument('--val-split', default='val', help="Name of the txt file (without .txt) that contains test sequence IDs (used for half.txt)")
-    parser.add_argument('--subsample', default=10, type=int, help="Frame subsampling rate (e.g., 10 means 1 every 10 frames)")
+    parser.add_argument('--subsample', default=50, type=int, help="Frame subsampling rate (e.g., 10 means 1 every 10 frames)")
     return parser.parse_args()
 
 def read_split_file(path):
@@ -46,8 +46,8 @@ def main():
     train_paths = generate_file_list(args.motsynth_path, train_seqs, args.subsample)
     test_paths = generate_file_list(args.motsynth_path, test_seqs, args.subsample)
 
-    save_paths(osp.join(args.motsynth_path, args.save_dir), 'motsynth_10.train', train_paths)
-    save_paths(osp.join(args.motsynth_path, args.save_dir), 'motsynth_10.val', test_paths)
+    save_paths(osp.join(args.motsynth_path, args.save_dir), 'motsynth_50_train.train', train_paths)
+    save_paths(osp.join(args.motsynth_path, args.save_dir), 'motsynth_50_val.train', test_paths)
 
 if __name__ == '__main__':
     main()
